@@ -1,58 +1,41 @@
-// Assuming your JSON is something like:
-// [
-//   { "day": "mon", "amount": 17.45 },
-//   { "day": "tue", "amount": 34.91 },
-//   ...
-// ]
 fetch("data.json")
   .then((res) => res.json())
   .then((data) => {
-    const chartContainer = document.getElementById("spending-chart");
-    const todayIndex = new Date().getDay(); // Sunday = 0, Monday = 1, ...
-    const dayMap = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+    const chart = document.getElementById("spending-chart");
 
-    // Find the max amount for scaling
-    const maxAmount = Math.max(...data.map((d) => d.amount));
+    // Get today's day abbreviation in lowercase
+    const days = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+    const today = days[new Date().getDay()];
 
-    data.forEach((entry, index) => {
+    data.forEach((item) => {
       const barWrapper = document.createElement("div");
       barWrapper.classList.add("spending-chart__bar");
-      barWrapper.setAttribute("data-label", entry.day);
-      barWrapper.setAttribute("data-amount", `$${entry.amount.toFixed(2)}`);
-
-      // Create the bar itself
-      const bar = document.createElement("div");
-      bar.classList.add("bar");
-      if (entry.day === dayMap[todayIndex]) {
-        bar.classList.add("active");
-      }
-
-      // Set bar height proportional to amount
-      const heightPercent = (entry.amount / maxAmount) * 100;
-      bar.style.height = `${heightPercent}%`;
 
       // Tooltip
       const tooltip = document.createElement("div");
-      tooltip.classList.add("tooltip");
-      tooltip.textContent = `$${entry.amount.toFixed(2)}`;
+      tooltip.className = "tooltip";
+      tooltip.textContent = `$${item.amount}`;
 
-      // Day label
+      // Bar
+      const bar = document.createElement("div");
+      bar.className = "bar";
+      bar.style.height = `${item.amount * 2.5}px`; // scale height
+
+      // Add 'active' class if it's today's bar
+      if (item.day.toLowerCase() === today) {
+        bar.classList.add("active");
+      }
+
+      // Label
       const label = document.createElement("span");
-      label.classList.add("label");
-      label.textContent = entry.day;
+      label.className = "label";
+      label.textContent = item.day;
 
-      // Hover effect
-      barWrapper.addEventListener("mouseenter", () => {
-        tooltip.style.display = "block";
-      });
-      barWrapper.addEventListener("mouseleave", () => {
-        tooltip.style.display = "none";
-      });
-
+      // Compose
       barWrapper.appendChild(tooltip);
       barWrapper.appendChild(bar);
       barWrapper.appendChild(label);
-      chartContainer.appendChild(barWrapper);
+
+      chart.appendChild(barWrapper);
     });
-  })
-  .catch((err) => console.error("Failed to load chart data:", err));
+  });
