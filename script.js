@@ -3,39 +3,33 @@ fetch("data.json")
   .then((data) => {
     const chart = document.getElementById("spending-chart");
 
-    // Get today's day abbreviation in lowercase
     const days = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
     const today = days[new Date().getDay()];
 
+    // Calculate max for proportional height
+    const maxAmount = Math.max(...data.map((item) => item.amount));
+
     data.forEach((item) => {
-      const barWrapper = document.createElement("div");
-      barWrapper.classList.add("spending-chart__bar");
-
-      // Tooltip
-      const tooltip = document.createElement("div");
-      tooltip.className = "tooltip";
-      tooltip.textContent = `$${item.amount}`;
-
-      // Bar
       const bar = document.createElement("div");
-      bar.className = "bar";
-      bar.style.height = `${item.amount * 2.5}px`; // scale height
 
-      // Add 'active' class if it's today's bar
+      bar.classList.add("spending-chart__bar");
+      bar.setAttribute("data-label", item.day);
+      bar.setAttribute("data-amount", `$${item.amount}`);
+
+      // Highlight today's bar
       if (item.day.toLowerCase() === today) {
         bar.classList.add("active");
       }
 
-      // Label
+      // Set proportional height (max height ~150px)
+      const height = (item.amount / maxAmount) * 150;
+      bar.style.height = `${height}px`;
+
+      // Add label below
       const label = document.createElement("span");
-      label.className = "label";
       label.textContent = item.day;
 
-      // Compose
-      barWrapper.appendChild(tooltip);
-      barWrapper.appendChild(bar);
-      barWrapper.appendChild(label);
-
-      chart.appendChild(barWrapper);
+      bar.appendChild(label);
+      chart.appendChild(bar);
     });
   });
